@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RM Taxi Services Fare Calculator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #111827;
+      color: #1f2937;
+      margin: 0;
+      padding: 16px;
+    }
+    .sheet {
+      max-width: 540px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .header {
+      background: #000000;
+      padding: 16px 16px 14px;
+      text-align: center;
+      border-bottom: 3px solid #d4af37;
+    }
+    .header svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .sheet-title {
+      color: #f3d06b;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin: 8px 0 0;
+      text-transform: uppercase;
+    }
+    .content {
+      padding: 20px 22px 24px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: #111827;
+    }
+    .ac-wrap {
+      position: relative;
+      margin-top: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .ac-input {
+      width: 100%;
+      padding: 11px 12px;
+      border: none;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 0.98rem;
+      color: #111827;
+      background: transparent;
+      outline: none;
+    }
+    .ac-input:focus {
+      box-shadow: 0 0 0 2px #d4af37;
+    }
+    .ac-dropdown {
+      position: absolute;
+      top: 100%;
+      left: -1px;
+      right: -1px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+      z-index: 1000;
+      max-height: 230px;
+      overflow-y: auto;
+      display: none;
+    }
+    .ac-item {
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      color: #111827;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      line-height: 1.35;
+    }
+    .ac-item:last-child {
+      border-bottom: none;
+    }
+    .ac-item:hover, .ac-item:active {
+      background: #fef3c7;
+    }
+    .ac-item-main {
+      font-weight: 600;
+      display: block;
+    }
+    .ac-item-sub {
+      font-size: 0.78rem;
+      color: #6b7280;
+      display: block;
+    }
+    .via-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .via-row .ac-wrap {
+      flex: 1;
+      margin-top: 0;
+    }
+    .remove-via {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      width: auto;
+      margin-top: 0;
+    }
+    .add-via-btn {
+      background: #f3f4f6;
+      color: #111827;
+      border: 1px dashed #9ca3af;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      width: auto;
+      display: inline-block;
+    }
+    .add-via-btn:hover {
+      background: #e5e7eb;
+    }
+    input[type="datetime-local"] {
+      width: 100%;
+      padding: 11px;
+      margin-top: 6px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 0.98rem;
+      background: #fff;
+      color: #111827;
+      font-family: inherit;
+    }
+    .checkbox-group {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .checkbox-group label {
+      font-weight: 500;
+      margin-top: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      cursor: pointer;
+      line-height: 1.35;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .calc-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      background: #000000;
+      color: #f3d06b;
+      border: 2px solid #d4af37;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+    }
+    .calc-btn:hover {
+      background: #1f2937;
+    }
+    .calc-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .error {
+      color: #dc2626;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      display: none;
+    }
+    .total-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: #4b5563;
+      font-weight: 700;
+    }
+    .total {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #059669;
+      margin: 4px 0 6px;
+    }
+    .fare-note {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .book-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 14px;
+    }
+    .book-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #374151;
+      margin-bottom: 2px;
+    }
+    .book-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-sizing: border-box;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+    .book-btn:hover {
+      opacity: 0.9;
+    }
+    .btn-call {
+      background: #111827;
+      color: #f3d06b;
+      border: 1.5px solid #d4af37;
+    }
+    .btn-whatsapp {
+      background: #16a34a;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="header">
+      <svg viewBox="0 0 600 185" width="460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RM Taxi Services">
+        <defs>
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f7e28b"/>
+            <stop offset="45%" stop-color="#d4af37"/>
+            <stop offset="100%" stop-color="#9e761c"/>
+          </linearGradient>
+        </defs>
+        <path d="M 30 118 Q 300 -68 570 118 Q 300 -42 30 118 Z" fill="url(#goldGrad)"/>
+        <path d="M 75 154 Q 300 172 525 154 Q 300 163 75 154 Z" fill="url(#goldGrad)"/>
+        <text x="300" y="116" text-anchor="middle" fill="url(#goldGrad)" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="66" letter-spacing="4">RM</text>
+        <text x="300" y="144" text-anchor="middle" fill="url(#goldGrad)" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="23" letter-spacing="5">TAXI SERVICES</text>
+        <line x1="115" y1="137" x2="175" y2="137" stroke="url(#goldGrad)" stroke-width="2.5"/>
+        <line x1="425" y1="137" x2="485" y2="137" stroke="url(#goldGrad)" stroke-width="2.5"/>
+        <g transform="translate(88, 90) rotate(-14)">
+          <path d="M0 16 L28 13 L42 2 L46 3 L37 13 L52 12 L57 6 L60 7 L56 14 L60 20 L57 21 L52 16 L37 16 L46 27 L42 28 L28 17 L0 18 Z" fill="url(#goldGrad)"/>
+        </g>
+        <g transform="translate(512, 90) scale(-1, 1) rotate(-14)">
+          <path d="M0 16 L28 13 L42 2 L46 3 L37 13 L52 12 L57 6 L60 7 L56 14 L60 20 L57 21 L52 16 L37 16 L46 27 L42 28 L28 17 L0 18 Z" fill="url(#goldGrad)"/>
+        </g>
+        <g transform="translate(270, 153)" fill="url(#goldGrad)">
+          <rect x="0" y="0" width="10" height="5"/>
+          <rect x="20" y="0" width="10" height="5"/>
+          <rect x="40" y="0" width="10" height="5"/>
+          <rect x="10" y="5" width="10" height="5"/>
+          <rect x="30" y="5" width="10" height="5"/>
+          <rect x="50" y="5" width="10" height="5"/>
+        </g>
+      </svg>
+      <div class="sheet-title">RM Taxi Services Fare Calculator</div>
+    </div>
+
+    <div class="content">
+      <label for="pickupInput">Pickup Location</label>
+      <div class="ac-wrap" id="pickupWrap">
+        <input type="text" id="pickupInput" class="ac-input" placeholder="Enter pickup address or postcode..." autocomplete="off" />
+        <div class="ac-dropdown" id="pickupDropdown"></div>
+      </div>
+
+      <div id="viaContainer"></div>
+      <button type="button" class="add-via-btn" id="addViaBtn">+ Add Via Stop</button>
+
+      <label for="dropoffInput">Drop-off Location</label>
+      <div class="ac-wrap" id="dropoffWrap">
+        <input type="text" id="dropoffInput" class="ac-input" placeholder="Enter drop-off address or postcode..." autocomplete="off" />
+        <div class="ac-dropdown" id="dropoffDropdown"></div>
+      </div>
+
+      <label for="pickupDateTime">Pickup Date &amp; Time</label>
+      <input type="datetime-local" id="pickupDateTime" />
+
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="mpvCharge" /> MPV for &gt;4 passengers or bulky items (+£5.00)</label>
+      </div>
+
+      <button type="button" class="calc-btn" id="calcBtn">Calculate Fare</button>
+      <div id="error" class="error"></div>
+
+      <div id="result" class="result">
+        <div class="total-label">Estimated Fare</div>
+        <div class="total" id="totalFare">£0.00</div>
+        <div class="fare-note" id="fareNote">Includes booking fee. Final meter fare may vary depending on traffic or waiting time.</div>
+
+        <div class="book-actions">
+          <div class="book-title">Book This Journey</div>
+          <a id="callBookBtn" class="book-btn btn-call" href="tel:+447496021315">📞 Call to Book (07496 021315)</a>
+          <a id="whatsappBookBtn" class="book-btn btn-whatsapp" href="#" target="_blank" rel="noopener noreferrer">💬 Book via WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+      key: "AIzaSyBvsE8NUgYAqj2zo48oehtYai423LykWUI",
+      v: "weekly"
+    });
+  </script>
+
+  <script>
+    const TAXI_PHONE = "+447496021315";
+    const TAXI_WHATSAPP = "447496021315";
+
+    const BONESS_CENTER = { lat: 56.0170, lng: -3.6080 };
+    const BONESS_BIAS = {
+      center: BONESS_CENTER,
+      radius: 12000
+    };
+
+    const CHEAPEST_MIN_SAVINGS_POUNDS = 2.00;
+    const CHEAPEST_MAX_EXTRA_MINS_SAVINGS = 12;
+    const CHEAPEST_MAX_EXTRA_PERCENT_SAVINGS = 0.45;
+    const CHEAPEST_MAX_EXTRA_MINS_SMALL = 5;
+    const CHEAPEST_MAX_EXTRA_PERCENT_SMALL = 0.25;
+
+    let PlaceClass, RouteClass, AutocompleteSuggestionClass, AutocompleteSessionTokenClass;
+    let googleLibsReady = false;
+    let pickupState = { place: null, text: "", el: null, dropdown: null };
+    let dropoffState = { place: null, text: "", el: null, dropdown: null };
+    const viaItems = [];
+
+    function setDefaultDateTime() {
+      const dtInput = document.getElementById("pickupDateTime");
+      if (!dtInput) return;
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      dtInput.value = now.toISOString().slice(0, 16);
+    }
+
+    function getTariffForDateTime(dateTimeStr) {
+      const dt = dateTimeStr ? new Date(dateTimeStr) : new Date();
+      if (isNaN(dt.getTime())) return 1;
+
+      const month = dt.getMonth() + 1;
+      const day = dt.getDate();
+      const hour = dt.getHours();
+
+      if (month === 12) {
+        if ((day === 24 && hour >= 18) || day === 25 || day === 26 || (day === 27 && hour < 6)) {
+          return 3;
+        }
+        if (day === 31 && hour >= 18) {
+          return 3;
+        }
+      }
+      if (month === 1) {
+        if (day === 1 || day === 2 || (day === 3 && hour < 6)) {
+          return 3;
+        }
+      }
+
+      if (hour >= 21 || hour < 6) {
+        return 2;
+      }
+
+      return 1;
+    }
+
+    function formatDisplayDateTime(dateTimeStr) {
+      const dt = dateTimeStr ? new Date(dateTimeStr) : new Date();
+      if (isNaN(dt.getTime())) return "ASAP";
+      return dt.toLocaleString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    async function fetchLocalPhotons(queryText) {
+      const url = "https://photon.komoot.io/api/?q=" +
+        encodeURIComponent(queryText + " UK") +
+        "&lat=" + BONESS_CENTER.lat +
+        "&lon=" + BONESS_CENTER.lng +
+        "&limit=6";
+      const resp = await fetch(url);
+      if (!resp.ok) return [];
+      const data = await resp.json();
+      if (!data || !Array.isArray(data.features)) return [];
+
+      return data.features
+        .filter(f => f.properties && (f.properties.countrycode === "GB" || f.properties.country === "United Kingdom"))
+        .map(f => {
+          const p = f.properties;
+          const coords = f.geometry && f.geometry.coordinates;
+          const mainParts = [p.housenumber, p.street || p.name].filter(Boolean);
+          const mainText = mainParts.join(" ") || p.postcode || queryText;
+          const subParts = [p.city || p.town || p.village || p.locality, p.county, p.postcode].filter(Boolean);
+          const subText = subParts.join(", ");
+          const fullLabel = [mainText, subText].filter(Boolean).join(", ");
+          return {
+            mainText,
+            subText,
+            fullLabel,
+            location: coords && coords.length >= 2 ? { lat: coords[1], lng: coords[0] } : null
+          };
+        });
+    }
+
+    function bindAutocomplete(inputEl, dropdownEl, stateObj) {
+      stateObj.el = inputEl;
+      stateObj.dropdown = dropdownEl;
+      let debounceTimer = null;
+      let sessionToken = null;
+
+      function hideDropdown() {
+        dropdownEl.style.display = "none";
+        dropdownEl.innerHTML = "";
+      }
+
+      function renderDropdownItems(items) {
+        dropdownEl.innerHTML = "";
+        if (!items || !items.length) {
+          hideDropdown();
+          return;
+        }
+        items.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "ac-item";
+          row.innerHTML =
+            '<span class="ac-item-main">' + escapeHtml(item.mainText) + '</span>' +
+            (item.subText ? '<span class="ac-item-sub">' + escapeHtml(item.subText) + '</span>' : '');
+
+          const chooseItem = async (ev) => {
+            ev.preventDefault();
+            inputEl.value = item.fullLabel;
+            stateObj.text = item.fullLabel;
+            hideDropdown();
+
+            if (item.placePrediction) {
+              try {
+                const place = item.placePrediction.toPlace();
+                await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
+                stateObj.place = place;
+                stateObj.text = place.formattedAddress || place.displayName || item.fullLabel;
+                inputEl.value = stateObj.text;
+                sessionToken = null;
+              } catch (e) {
+                stateObj.place = null;
+              }
+            } else if (item.location) {
+              stateObj.place = {
+                location: item.location,
+                formattedAddress: item.fullLabel,
+                displayName: item.mainText
+              };
+            } else {
+              stateObj.place = null;
+            }
+          };
+
+          row.addEventListener("mousedown", chooseItem);
+          row.addEventListener("touchstart", chooseItem, { passive: false });
+          dropdownEl.appendChild(row);
+        });
+        dropdownEl.style.display = "block";
+      }
+
+      inputEl.addEventListener("input", () => {
+        stateObj.place = null;
+        stateObj.text = inputEl.value || "";
+        const val = stateObj.text.trim();
+
+        clearTimeout(debounceTimer);
+        if (val.length < 2) {
+          hideDropdown();
+          return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+          let results = [];
+
+          if (googleLibsReady && AutocompleteSuggestionClass) {
+            try {
+              if (!sessionToken && AutocompleteSessionTokenClass) {
+                sessionToken = new AutocompleteSessionTokenClass();
+              }
+              const req = {
+                input: val,
+                includedRegionCodes: ["gb"],
+                locationBias: BONESS_BIAS,
+                origin: BONESS_CENTER
+              };
+              if (sessionToken) req.sessionToken = sessionToken;
+
+              const { suggestions } = await AutocompleteSuggestionClass.fetchAutocompleteSuggestions(req);
+              if (suggestions && suggestions.length) {
+                results = suggestions
+                  .filter(s => s.placePrediction)
+                  .map(s => {
+                    const pred = s.placePrediction;
+                    const full = pred.text ? pred.text.text : "";
+                    const main = pred.mainText ? pred.mainText.text : full;
+                    const sub = pred.secondaryText ? pred.secondaryText.text : "";
+                    return {
+                      mainText: main,
+                      subText: sub,
+                      fullLabel: full,
+                      placePrediction: pred
+                    };
+                  });
+              }
+            } catch (err) {
+              results = [];
+            }
+          }
+
+          if (!results.length) {
+            try {
+              results = await fetchLocalPhotons(val);
+            } catch (err) {
+              results = [];
+            }
+          }
+
+          renderDropdownItems(results);
+        }, 220);
+      });
+
+      inputEl.addEventListener("blur", () => {
+        setTimeout(hideDropdown, 180);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function initApp() {
+      setDefaultDateTime();
+
+      bindAutocomplete(
+        document.getElementById("pickupInput"),
+        document.getElementById("pickupDropdown"),
+        pickupState
+      );
+      bindAutocomplete(
+        document.getElementById("dropoffInput"),
+        document.getElementById("dropoffDropdown"),
+        dropoffState
+      );
+
+      document.getElementById("addViaBtn").addEventListener("click", () => {
+        const row = document.createElement("div");
+        row.className = "via-row";
+
+        const wrap = document.createElement("div");
+        wrap.className = "ac-wrap";
+
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.className = "ac-input";
+        inp.placeholder = "Enter via stop address...";
+        inp.autocomplete = "off";
+
+        const dd = document.createElement("div");
+        dd.className = "ac-dropdown";
+
+        wrap.appendChild(inp);
+        wrap.appendChild(dd);
+
+        const viaState = { place: null, text: "", el: inp, dropdown: dd, rowEl: row };
+        bindAutocomplete(inp, dd, viaState);
+
+        const remBtn = document.createElement("button");
+        remBtn.type = "button";
+        remBtn.className = "remove-via";
+        remBtn.textContent = "✕";
+        remBtn.title = "Remove via stop";
+        remBtn.onclick = () => {
+          const idx = viaItems.indexOf(viaState);
+          if (idx > -1) viaItems.splice(idx, 1);
+          row.remove();
+        };
+
+        row.appendChild(wrap);
+        row.appendChild(remBtn);
+        document.getElementById("viaContainer").appendChild(row);
+        viaItems.push(viaState);
+      });
+
+      document.getElementById("calcBtn").addEventListener("click", calculateFare);
+
+      try {
+        const placesLib = await google.maps.importLibrary("places");
+        const routesLib = await google.maps.importLibrary("routes");
+        PlaceClass = placesLib.Place;
+        AutocompleteSuggestionClass = placesLib.AutocompleteSuggestion;
+        AutocompleteSessionTokenClass = placesLib.AutocompleteSessionToken;
+        RouteClass = routesLib.Route;
+        googleLibsReady = true;
+      } catch (err) {
+        googleLibsReady = false;
+      }
+    }
+
+    async function resolveLocation(stateObj, labelName) {
+      if (stateObj.place && stateObj.place.location) {
+        return {
+          location: stateObj.place.location,
+          label: stateObj.place.formattedAddress || stateObj.place.displayName || stateObj.text
+        };
+      }
+      const rawText = (stateObj.el && stateObj.el.value ? stateObj.el.value : stateObj.text).trim();
+      if (!rawText) {
+        throw new Error("Please enter a " + labelName + " location.");
+      }
+
+      if (googleLibsReady && PlaceClass) {
+        try {
+          const query = rawText.toLowerCase().includes("uk") ? rawText : rawText + ", Bo'ness, UK";
+          const { places } = await PlaceClass.searchByText({
+            textQuery: query,
+            fields: ["displayName", "formattedAddress", "location"],
+            locationBias: BONESS_BIAS,
+            maxResultCount: 1
+          });
+          if (places && places.length && places[0].location) {
+            stateObj.place = places[0];
+            stateObj.text = places[0].formattedAddress || places[0].displayName || rawText;
+            return {
+              location: places[0].location,
+              label: stateObj.text
+            };
+          }
+        } catch (e) {}
+      }
+
+      const photonMatches = await fetchLocalPhotons(rawText);
+      if (photonMatches && photonMatches.length && photonMatches[0].location) {
+        stateObj.place = {
+          location: photonMatches[0].location,
+          formattedAddress: photonMatches[0].fullLabel,
+          displayName: photonMatches[0].mainText
+        };
+        stateObj.text = photonMatches[0].fullLabel;
+        return {
+          location: photonMatches[0].location,
+          label: photonMatches[0].fullLabel
+        };
+      }
+
+      throw new Error('Could not find "' + rawText + '". Try adding a street name or postcode.');
+    }
+
+    async function getAllRoutesNoTraffic(originLoc, destLoc, intermediatesList) {
+      if (!googleLibsReady || !RouteClass) {
+        const routesLib = await google.maps.importLibrary("routes");
+        RouteClass = routesLib.Route;
+        googleLibsReady = true;
+      }
+      const hasVias = intermediatesList && intermediatesList.length > 0;
+      const req = {
+        origin: originLoc,
+        destination: destLoc,
+        travelMode: "DRIVING",
+        routingPreference: "TRAFFIC_UNAWARE",
+        computeAlternativeRoutes: !hasVias,
+        fields: ["distanceMeters", "durationMillis", "description"]
+      };
+      if (hasVias) {
+        req.intermediates = intermediatesList.map(loc => ({ location: loc }));
+      }
+      const { routes } = await RouteClass.computeRoutes(req);
+      if (!routes || !routes.length) {
+        throw new Error("No driving route found between these locations.");
+      }
+      return routes;
+    }
+
+    function computeFareForRoute(route, tariff, extras) {
+      const distanceMeters = route.distanceMeters || 0;
+      const distanceYards = distanceMeters * 1.0936133;
+      const durationMins = (route.durationMillis || 0) / 60000;
+
+      const multiplier = tariff === 3 ? 2.0 : (tariff === 2 ? 1.25 : 1.0);
+      const baseCharge = 3.00 * multiplier;
+      const unitCharge = 0.20 * multiplier;
+
+      let extraUnits = 0;
+      if (distanceYards > 720.2) {
+        extraUnits = Math.ceil((distanceYards - 720.2) / 159.8);
+      }
+
+      const rawMeterFare = baseCharge + (extraUnits * unitCharge);
+      const meterFareWith10 = rawMeterFare * 1.10;
+      const grandTotal = meterFareWith10 + extras;
+
+      return {
+        route,
+        durationMins,
+        grandTotal
+      };
+    }
+
+    function pickBestValueRoute(evaluatedRoutes) {
+      if (evaluatedRoutes.length === 1) {
+        return { chosen: evaluatedRoutes[0], switchedFromFastest: false };
+      }
+
+      const byTime = [...evaluatedRoutes].sort((a, b) => a.durationMins - b.durationMins);
+      const fastest = byTime[0];
+      const byPrice = [...evaluatedRoutes].sort((a, b) => a.grandTotal - b.grandTotal);
+
+      for (const candidate of byPrice) {
+        const priceSavings = fastest.grandTotal - candidate.grandTotal;
+        const extraMins = candidate.durationMins - fastest.durationMins;
+        const maxMinsAllowed = priceSavings > CHEAPEST_MIN_SAVINGS_POUNDS
+          ? Math.max(CHEAPEST_MAX_EXTRA_MINS_SAVINGS, fastest.durationMins * CHEAPEST_MAX_EXTRA_PERCENT_SAVINGS)
+          : Math.max(CHEAPEST_MAX_EXTRA_MINS_SMALL, fastest.durationMins * CHEAPEST_MAX_EXTRA_PERCENT_SMALL);
+
+        if (extraMins <= maxMinsAllowed) {
+          return {
+            chosen: candidate,
+            switchedFromFastest: candidate !== fastest && priceSavings > 0.05
+          };
+        }
+      }
+
+      return { chosen: fastest, switchedFromFastest: false };
+    }
+
+    async function calculateFare() {
+      const btn = document.getElementById("calcBtn");
+      const errorEl = document.getElementById("error");
+      const resultEl = document.getElementById("result");
+      const fareNoteEl = document.getElementById("fareNote");
+      errorEl.textContent = "";
+      resultEl.style.display = "none";
+      btn.disabled = true;
+      btn.textContent = "Calculating...";
+
+      try {
+        const pickup = await resolveLocation(pickupState, "pickup");
+        const dropoff = await resolveLocation(dropoffState, "drop-off");
+
+        const resolvedVias = [];
+        for (let i = 0; i < viaItems.length; i++) {
+          const vText = (viaItems[i].el && viaItems[i].el.value ? viaItems[i].el.value : viaItems[i].text).trim();
+          if (vText || viaItems[i].place) {
+            const rv = await resolveLocation(viaItems[i], "via stop #" + (i + 1));
+            resolvedVias.push(rv);
+          }
+        }
+
+        const allRoutes = await getAllRoutesNoTraffic(
+          pickup.location,
+          dropoff.location,
+          resolvedVias.map(v => v.location)
+        );
+
+        const dateTimeVal = document.getElementById("pickupDateTime").value;
+        const tariff = getTariffForDateTime(dateTimeVal);
+        const isMpv = document.getElementById("mpvCharge").checked;
+
+        let extras = 0.50;
+        if (isMpv) {
+          extras += 5.00;
+        }
+
+        const [pickupRoutes, dropoffRoutes] = await Promise.all([
+          getAllRoutesNoTraffic(BONESS_CENTER, pickup.location, []),
+          getAllRoutesNoTraffic(BONESS_CENTER, dropoff.location, [])
+        ]);
+        const fromPickup = [...pickupRoutes].sort((a, b) => (a.durationMillis || Infinity) - (b.durationMillis || Infinity))[0];
+        const fromDropoff = [...dropoffRoutes].sort((a, b) => (a.durationMillis || Infinity) - (b.durationMillis || Infinity))[0];
+        const minsPickup = (fromPickup.durationMillis || 0) / 60000;
+        const minsDropoff = (fromDropoff.durationMillis || 0) / 60000;
+        const closestRoute = minsPickup <= minsDropoff ? fromPickup : fromDropoff;
+        const closestMins = Math.min(minsPickup, minsDropoff);
+
+        if (closestMins > 15) {
+          const ooaMiles = (closestRoute.distanceMeters || 0) / 1609.344;
+          extras += ooaMiles * 1.00;
+        }
+
+        const evaluatedRoutes = allRoutes.map(r => computeFareForRoute(r, tariff, extras));
+        const { chosen, switchedFromFastest } = pickBestValueRoute(evaluatedRoutes);
+        const fareFormatted = "£" + chosen.grandTotal.toFixed(2);
+
+        document.getElementById("totalFare").textContent = fareFormatted;
+        fareNoteEl.textContent = switchedFromFastest
+          ? "Best-value direct route selected to save you money. Includes booking fee; final meter fare may vary with traffic."
+          : "Includes booking fee. Final meter fare may vary depending on traffic or waiting time.";
+
+        const viaLines = resolvedVias.length
+          ? "Via: " + resolvedVias.map(v => v.label).join(" -> ") + "\n"
+          : "";
+        const bookingMessage =
+          "Hi RM Taxi Services, I would like to book a taxi:\n" +
+          "Pickup: " + pickup.label + "\n" +
+          viaLines +
+          "Drop-off: " + dropoff.label + "\n" +
+          "Date/Time: " + formatDisplayDateTime(dateTimeVal) + "\n" +
+          "Vehicle: " + (isMpv ? "MPV (>4 passengers / bulky items)" : "Standard Saloon") + "\n" +
+          "Estimated Fare: " + fareFormatted;
+
+        document.getElementById("callBookBtn").href = "tel:" + TAXI_PHONE;
+        document.getElementById("whatsappBookBtn").href =
+          "https://wa.me/" + TAXI_WHATSAPP + "?text=" + encodeURIComponent(bookingMessage);
+
+        resultEl.style.display = "block";
+      } catch (err) {
+        errorEl.textContent = err.message || "Error calculating route.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Calculate Fare";
+      }
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
